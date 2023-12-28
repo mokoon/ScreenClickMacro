@@ -7,9 +7,9 @@ import time
 import tkinter as tk
 from tkinter import Menu
 import threading
+import random
 
-
-
+#화면 처리
 def find_image_on_screen(image_path, confidence=0.8):
     # 화면 캡쳐
     screen = np.array(ImageGrab.grab())
@@ -28,15 +28,24 @@ def find_image_on_screen(image_path, confidence=0.8):
 
     return None
 
+#매크로
 def macro(image):
     position = find_image_on_screen(image)
     if position:
-        print("이미지 찾음:", position)
-        pyautogui.click(position)
+        # 클릭 위치에 무작위 오프셋 추가
+        random_offset_x = random.randint(-25, 25)
+        random_offset_y = random.randint(-15, 15)
+        new_position = (position[0] + random_offset_x, position[1] + random_offset_y)
+
+        print("이미지 찾음:", new_position)
+        pyautogui.click(new_position)
     else:
         print("이미지를 찾을 수 없음")
-    time.sleep(0.5)
+    # 기본 0.5초에 0초에서 0.5초 사이의 무작위 시간을 추가
+    random_delay = random.uniform(0, 0.5)
+    time.sleep(0.5 + random_delay)
 
+#닫힐 때
 def on_closing():
     global running, macro_running
     running = False
@@ -44,6 +53,7 @@ def on_closing():
     root.destroy()
     print("프로그램 종료")
 
+#창 생성
 def create_tray_icon():
     global root, macro_state_label
     root = tk.Tk()
