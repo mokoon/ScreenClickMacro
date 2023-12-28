@@ -28,3 +28,4 @@ pip install opencv-python numpy pyautogui keyboard pillow
 코드 수정시 고려사항
 이미지 명, 이미지 주소 필히 확인
 매크로는 원하는만큼 추가해서 사용 가능
+macro함수 내부 이미지 좌표 클릭 위치 랜덤값 가중치는 이미지 크기에 맞춰서 설정해줘야됨
