@@ -4,6 +4,11 @@ import pyautogui
 import keyboard
 from PIL import ImageGrab
 import time
+import tkinter as tk
+from tkinter import Menu
+import threading
+
+
 
 def find_image_on_screen(image_path, confidence=0.8):
     # 화면 캡쳐
@@ -23,28 +28,67 @@ def find_image_on_screen(image_path, confidence=0.8):
 
     return None
 
-def main():
-    running = False
+def macro(image):
+    position = find_image_on_screen(image)
+    if position:
+        print("이미지 찾음:", position)
+        pyautogui.click(position)
+    else:
+        print("이미지를 찾을 수 없음")
+    time.sleep(0.5)
 
-    while True:
-        # 특정 키 ('s' 예시)를 누르면 매크로 시작/종료
+def on_closing():
+    global running, macro_running
+    running = False
+    macro_running = False
+    root.destroy()
+    print("프로그램 종료")
+
+def create_tray_icon():
+    global root, macro_state_label
+    root = tk.Tk()
+    root.title("매크로 프로그램")
+    root.iconbitmap('icon\M_icon.ico')
+
+    menu = Menu(root, tearoff=0)
+    menu.add_command(label="종료", command=on_closing)
+    root.bind("<Button-3>", lambda event: menu.post(event.x_root, event.y_root))
+
+    macro_state_label = tk.Label(root, text="매크로 준비 상태")
+    macro_state_label.pack()
+
+    # 창 닫기 이벤트 핸들러 설정
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
+    root.mainloop()
+
+
+# 매크로 실행 상태
+macro_running = False
+
+def main():
+    global macro_running, running, macro_state_label
+    running = True
+
+    tray_thread = threading.Thread(target=create_tray_icon)
+    tray_thread.daemon = True
+    tray_thread.start()
+
+    while running:
         if keyboard.is_pressed('-'):
-            running = not running
-            if running:
-                print("매크로 시작")
+            macro_running = not macro_running
+            if macro_running:
+                macro_state_label.config(text="매크로 실행 상태")
             else:
-                print("매크로 종료")
-                time.sleep(2)
+                macro_state_label.config(text="매크로 중지 상태")
+            time.sleep(1)  # 키 반복 방지 대기 시간
             keyboard.wait('-')
 
-        if running:
-            position = find_image_on_screen('img\8.png') # 이미지 경로
-            if position:
-                print("이미지 찾음:", position)
-                pyautogui.click(position)
-            else:
-                print("이미지를 찾을 수 없음")
-            time.sleep(0.5)
+        if macro_running:
+            # 매크로 실행
+            macro('img\winrate.png')
+            macro('img\winr.png')
+            time.sleep(2)
 
 if __name__ == "__main__":
     main()

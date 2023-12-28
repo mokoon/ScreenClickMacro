@@ -1,0 +1,6 @@
+
+#필요한 외부 라이브러리
+pip install opencv-python numpy pyautogui keyboard pillow
+
+#exe파일 추출(윈도우 기본 보안프로그램에서 트로이 목마로 검출하므로 예외 설정이 필요함)
+pyinstaller -w -F ScreenMacro.py
