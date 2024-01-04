@@ -32,6 +32,8 @@ def find_image_on_screen(image_path, confidence=0.8):
 def macro(image):
     position = find_image_on_screen(image)
     if position:
+        # 현재 마우스 위치 저장
+        current_mouse_x, current_mouse_y = pyautogui.position()
         # 클릭 위치에 무작위 오프셋 추가
         random_offset_x = random.randint(-25, 25)
         random_offset_y = random.randint(-15, 15)
@@ -39,6 +41,8 @@ def macro(image):
 
         print("이미지 찾음:", new_position)
         pyautogui.click(new_position)
+        # 마우스를 원래 위치로 이동
+        pyautogui.moveTo(current_mouse_x, current_mouse_y)
     else:
         print("이미지를 찾을 수 없음")
     # 기본 0.5초에 0초에서 0.5초 사이의 무작위 시간을 추가
