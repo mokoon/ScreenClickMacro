@@ -47,19 +47,20 @@ def macro(image):
         print("이미지를 찾을 수 없음")
     # 기본 0.5초에 0초에서 0.5초 사이의 무작위 시간을 추가
     random_delay = random.uniform(0, 0.5)
-    time.sleep(0.5 + random_delay)
+    time.sleep(0.1 + random_delay)
 
 #닫힐 때
 def on_closing():
-    global running, macro_running
+    global running, macro1_running
     running = False
-    macro_running = False
+    macro1_running = False
     root.destroy()
     print("프로그램 종료")
 
 #창 생성
 def create_tray_icon():
-    global root, macro_state_label
+    #매크로 추가할때 추가해야되는 부분
+    global root, macro1_state_label, macro2_state_label
     root = tk.Tk()
     root.title("매크로 프로그램")
     root.iconbitmap('icon\M_icon.ico')
@@ -67,21 +68,59 @@ def create_tray_icon():
     menu = Menu(root, tearoff=0)
     menu.add_command(label="종료", command=on_closing)
     root.bind("<Button-3>", lambda event: menu.post(event.x_root, event.y_root))
+    # macro1 관련 UI 구성
+    macro1_state_label = tk.Label(root, text="전투 매크로 준비 상태")
+    macro1_state_label.pack()
 
-    macro_state_label = tk.Label(root, text="매크로 준비 상태")
-    macro_state_label.pack()
+    macro1_button = tk.Button(root, text="승률버튼", command=button1_action)
+    macro1_button.pack()
+
+    # macro2 관련 UI 구성
+    macro2_state_label = tk.Label(root, text="매크로2 준비 상태")
+    macro2_state_label.pack()
+
+    macro2_button = tk.Button(root, text="매크로2 버튼", command=button2_action)
+    macro2_button.pack()
 
     # 창 닫기 이벤트 핸들러 설정
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
     root.mainloop()
 
+def button1_action():
+    global macro1_running, macro1_state_label
+    macro1_running = not macro1_running
+    if macro1_running:
+        macro1_state_label.config(text="전투 매크로 실행 상태")
+    else:
+        macro1_state_label.config(text="전투 매크로 중지 상태")
+
+def button2_action():
+    global macro2_running, macro2_state_label
+    macro2_running = not macro2_running
+    if macro2_running:
+        macro2_state_label.config(text="매크로2 실행 상태")
+    else:
+        macro2_state_label.config(text="매크로2 중지 상태")
+
+
+#승률 딸깍
+def BattleM():
+    # 매크로 실행
+    macro('img\winrate.png')
+    macro('img\winr.png')
+    time.sleep(2)
+
+#편성표 스킵, 대화 스킵 필요
 
 # 매크로 실행 상태
-macro_running = False
+macro1_running = False
+
+# 매크로2 실행 상태
+macro2_running = False
 
 def main():
-    global macro_running, running, macro_state_label
+    global macro1_running, running, macro1_state_label
     running = True
 
     tray_thread = threading.Thread(target=create_tray_icon)
@@ -89,20 +128,22 @@ def main():
     tray_thread.start()
 
     while running:
-        if keyboard.is_pressed('-'):
-            macro_running = not macro_running
-            if macro_running:
-                macro_state_label.config(text="매크로 실행 상태")
-            else:
-                macro_state_label.config(text="매크로 중지 상태")
-            time.sleep(1)  # 키 반복 방지 대기 시간
-            keyboard.wait('-')
+        # if keyboard.is_pressed('-'):
+        #     macro1_running = not macro1_running
+        #     if macro1_running:
+        #         macro1_state_label.config(text="매크로 실행 상태")
+        #     else:
+        #         macro1_state_label.config(text="매크로 중지 상태")
+        #     time.sleep(1)  # 키 반복 방지 대기 시간
+        #     keyboard.wait('-')
 
-        if macro_running:
-            # 매크로 실행
-            macro('img\winrate.png')
-            macro('img\winr.png')
-            time.sleep(2)
+        if macro1_running:
+            BattleM()
+
+         # macro2 관련 로직...
+        if macro2_running:
+            BattleM()
+            # 여기에 macro2의 기능 구현...
 
 if __name__ == "__main__":
     main()
