@@ -6,6 +6,7 @@ from PIL import ImageGrab
 import time
 import tkinter as tk
 from tkinter import Menu
+from tkinter import filedialog
 import threading
 import random
 
@@ -27,6 +28,50 @@ def find_image_on_screen(image_path, confidence=0.8):
         return pt[0] + w//2, pt[1] + h//2
 
     return None
+
+#멀티스레싱용
+def run_macro_in_thread(macro_function):
+    macro_thread = threading.Thread(target=macro_function)
+    macro_thread.start()
+
+# 화면 크롭용 전역 변수
+cropping = False
+x_start, y_start, x_end, y_end = 0, 0, 0, 0
+cropped = False
+
+# 화면 크롭용 함수
+def mouse_crop(event, x, y, flags, param):
+    global x_start, y_start, x_end, y_end, cropping, cropped
+
+    # 마우스 왼쪽 버튼 눌렀을 때
+    if event == cv2.EVENT_LBUTTONDOWN:
+        x_start, y_start, x_end, y_end = x, y, x, y
+        cropping = True
+
+    # 마우스 이동, 크롭 영역 그리기
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if cropping:
+            x_end, y_end = x, y
+
+    # 마우스 왼쪽 버튼 땠을 때
+    elif event == cv2.EVENT_LBUTTONUP:
+        x_end, y_end = x, y
+        cropping = False
+        cropped = True  # 크롭 끝, 이미지 저장 및 창 닫기
+# 크롭된 이미지 저장 함수
+def save_cropped_image(crop_img):
+    root = tk.Tk()
+    root.withdraw()  # Tk 창을 숨김
+    file_path = filedialog.asksaveasfilename(
+        initialdir="img/",
+        title="Save as",
+        filetypes=(("PNG files", "*.png"), ("All files", "*.*")),
+        defaultextension=".png"
+    )
+
+    if file_path:  # 사용자가 파일명을 입력하고 "저장"을 눌렀을 때
+        cv2.imwrite(file_path, crop_img)
+    root.destroy()
 
 #매크로
 def macro(image):
@@ -60,7 +105,7 @@ def on_closing():
 #창 생성
 def create_tray_icon():
     #매크로 추가할때 추가해야되는 부분
-    global root, macro1_state_label, macro2_state_label
+    global root, macro1_state_label, macro2_state_label, image_change_label
     root = tk.Tk()
     root.title("매크로 프로그램")
     root.iconbitmap('icon\M_icon.ico')
@@ -82,11 +127,19 @@ def create_tray_icon():
     macro2_button = tk.Button(root, text="매크로2 버튼", command=button2_action)
     macro2_button.pack()
 
+    # 이미지 변경 관련 UI 구성
+    image_change_label = tk.Label(root, text="찾을 이미지 변경")
+    image_change_label.pack()
+
+    image_change_button = tk.Button(root, text="이미지 변경", command=image_change_action)
+    image_change_button.pack()
+
     # 창 닫기 이벤트 핸들러 설정
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
     root.mainloop()
 
+#매크로 1번째 버튼 이벤트
 def button1_action():
     global macro1_running, macro1_state_label
     macro1_running = not macro1_running
@@ -95,13 +148,52 @@ def button1_action():
     else:
         macro1_state_label.config(text="전투 매크로 중지 상태")
 
+#매크로 2번째 버튼 이벤트
 def button2_action():
     global macro2_running, macro2_state_label
     macro2_running = not macro2_running
     if macro2_running:
         macro2_state_label.config(text="매크로2 실행 상태")
+        print("매크로 2 실행됨")
     else:
         macro2_state_label.config(text="매크로2 중지 상태")
+
+#이미지 변경 버튼 이벤트
+def image_change_action():
+    global x_start, y_start, x_end, y_end, cropping, cropped
+
+    # 스크린샷 캡쳐
+    screen = np.array(ImageGrab.grab())
+    screen_copy = screen.copy()
+
+    cv2.namedWindow("image")
+    cv2.setMouseCallback("image", mouse_crop)
+
+    while True:
+        i = screen_copy.copy()
+
+        if cropping:
+            cv2.rectangle(i, (x_start, y_start), (x_end, y_end), (255, 0, 0), 2)
+
+        cv2.imshow("image", i)
+
+        # 'q'를 누르면 종료
+        if cv2.waitKey(1) & 0xFF == ord('q') or cropped:
+            break
+
+    if cropped and x_start != x_end and y_start != y_end:
+        if x_start > x_end: # 좌표 정렬
+            x_start, x_end = x_end, x_start
+        if y_start > y_end:
+            y_start, y_end = y_end, y_start
+
+        # 선택 영역 저장
+        crop_img = screen[y_start:y_end, x_start:x_end]
+        save_cropped_image(crop_img)  # 사용자가 파일을 저장할 수 있도록 함
+
+    cv2.destroyAllWindows()
+
+
 
 
 #승률 딸깍
@@ -128,6 +220,7 @@ def main():
     tray_thread.start()
 
     while running:
+        
         # if keyboard.is_pressed('-'):
         #     macro1_running = not macro1_running
         #     if macro1_running:
@@ -138,12 +231,12 @@ def main():
         #     keyboard.wait('-')
 
         if macro1_running:
-            BattleM()
+            run_macro_in_thread(BattleM())  # 스레드에서 매크로 실행
 
-         # macro2 관련 로직...
-        if macro2_running:
-            BattleM()
-            # 여기에 macro2의 기능 구현...
+        #  # macro2 관련 로직...
+        # if macro2_running:
+        #     BattleM()
+        #     # 여기에 macro2의 기능 구현...
 
 if __name__ == "__main__":
     main()
