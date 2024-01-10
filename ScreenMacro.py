@@ -123,14 +123,14 @@ def create_tray_icon():
     macro1_state_label = tk.Label(root, text="전투 매크로 준비 상태")
     macro1_state_label.pack()
 
-    macro1_button = tk.Button(root, text="승률버튼", command=button1_action)
+    macro1_button = tk.Button(root, text="승률 버튼", command=button1_action)
     macro1_button.pack()
 
     # macro2 관련 UI 구성
-    macro2_state_label = tk.Label(root, text="매크로2 준비 상태")
+    macro2_state_label = tk.Label(root, text="거던 준비 상태")
     macro2_state_label.pack()
 
-    macro2_button = tk.Button(root, text="매크로2 버튼", command=button2_action)
+    macro2_button = tk.Button(root, text="거던 버튼", command=button2_action)
     macro2_button.pack()
 
     # 이미지 변경 관련 UI 구성
@@ -159,10 +159,9 @@ def button2_action():
     global macro2_running, macro2_state_label
     macro2_running = not macro2_running
     if macro2_running:
-        macro2_state_label.config(text="매크로2 실행 상태")
-        print("매크로 2 실행됨")
+        macro2_state_label.config(text="거던매크로 실행 상태")
     else:
-        macro2_state_label.config(text="매크로2 중지 상태")
+        macro2_state_label.config(text="거던매크로 중지 상태")
 
 #이미지 변경 버튼 이벤트
 def image_change_action():
@@ -199,15 +198,23 @@ def image_change_action():
 
     cv2.destroyAllWindows()
 
-
-
-
 #승률 딸깍
 def BattleM():
     # 매크로 실행
     macro('img\winrate.png')
     macro('img\winr.png')
     time.sleep(2)
+
+#거던 매크로
+def MirrorD():
+    #편성표클릭 필요(클릭)
+    #에고 획득 클릭
+    #선택지 스킵버튼 클릭
+    #거던 선택지 케이스 함수 따로 추가 필요(이미지 인식)
+    #판정 인격 클릭
+    #판정 버튼 클릭
+    #떠나기 버튼 클릭
+    time.sleep(.5)
 
 #편성표 스킵, 대화 스킵 필요
 
@@ -218,7 +225,7 @@ macro1_running = False
 macro2_running = False
 
 def main():
-    global macro1_running, running, macro1_state_label
+    global macro1_running, running, macro1_state_label, macro2_running
     running = True
 
     tray_thread = threading.Thread(target=create_tray_icon)
@@ -239,10 +246,9 @@ def main():
         if macro1_running:
             run_macro_in_thread(BattleM())  # 스레드에서 매크로 실행
 
-        #  # macro2 관련 로직...
-        # if macro2_running:
-        #     BattleM()
-        #     # 여기에 macro2의 기능 구현...
+        #  거던매크로 관련 로직...
+        if macro2_running:
+            run_macro_in_thread(MirrorD())  # 스레드에서 매크로 실행
 
 if __name__ == "__main__":
     main()
