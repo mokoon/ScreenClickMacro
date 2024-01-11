@@ -99,6 +99,10 @@ def macro(image):
     random_delay = random.uniform(0, 0.5)
     time.sleep(0.1 + random_delay)
 
+# 이미지가 화면에 나타나는지 확인하는 함수
+def Img_appear(image):
+    position = find_image_on_screen(image)
+    return position is not None
 
 #닫힐 때
 def on_closing():
@@ -110,8 +114,7 @@ def on_closing():
 
 #창 생성
 def create_tray_icon():
-    #매크로 추가할때 추가해야되는 부분
-    global root, macro1_state_label, macro2_state_label, image_change_label
+    global root, macro1_state_label, macro2_state_label, image_change_label, daily_q_label
     root = tk.Tk()
     root.title("매크로 프로그램")
     root.iconbitmap('icon\M_icon.ico')
@@ -139,6 +142,13 @@ def create_tray_icon():
 
     image_change_button = tk.Button(root, text="이미지 변경", command=image_change_action)
     image_change_button.pack()
+
+     # 경던,끈던 관련 UI 구성
+    daily_q_label = tk.Label(root, text="경던,끈던 실행")
+    daily_q_label.pack()
+
+    daily_q_button = tk.Button(root, text="경던,끈던 버튼", command=daily_q_action)
+    daily_q_button.pack()
 
     # 창 닫기 이벤트 핸들러 설정
     root.protocol("WM_DELETE_WINDOW", on_closing)
@@ -198,11 +208,32 @@ def image_change_action():
 
     cv2.destroyAllWindows()
 
+# 경던,끈던 버튼 이벤트
+def daily_q_action():
+    print("경던,끈던 버튼이 클릭되었습니다.")
+    # 여기에 경던,끈던 수행 코드 추가
+    #1. 메인화면
+    #2. 운전
+    #3. 채굴
+    #4. 경험치던전 5 자동 1회
+    #5. 끈던
+    #6. 끈던 자동 3회
+    #7. 메인화면
+
 #승률 딸깍
 def BattleM():
     # 매크로 실행
     macro('img\winrate.png')
     macro('img\winr.png')
+    time.sleep(2)
+
+# 전투 중 인격 사망시 루틴
+def DefeatM():
+    image = 'img\winrate.png'  # 인격 사망 이미지 경로
+    # if Img_appear(image):
+    #     macro(image) #설정창
+    #     macro(image) #전투 나가기
+    #     macro(image) #전투 다시하기
     time.sleep(2)
 
 #거던 매크로
@@ -245,6 +276,7 @@ def main():
 
         if macro1_running:
             run_macro_in_thread(BattleM())  # 스레드에서 매크로 실행
+            run_macro_in_thread(DefeatM())  # 스레드에서 매크로 실행
 
         #  거던매크로 관련 로직...
         if macro2_running:
