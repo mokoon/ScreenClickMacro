@@ -10,6 +10,8 @@ from tkinter import filedialog
 import threading
 import random
 
+#일반 매크로
+
 #화면 처리
 def find_image_on_screen(image_path, confidence=0.8):
     # 화면 캡쳐
@@ -122,19 +124,12 @@ def create_tray_icon():
     menu = Menu(root, tearoff=0)
     menu.add_command(label="종료", command=on_closing)
     root.bind("<Button-3>", lambda event: menu.post(event.x_root, event.y_root))
-    # macro1 관련 UI 구성
+    # macro1 관련 UI 구성 예시
     macro1_state_label = tk.Label(root, text="전투 매크로 준비 상태")
     macro1_state_label.pack()
 
     macro1_button = tk.Button(root, text="승률 버튼", command=button1_action)
     macro1_button.pack()
-
-    # macro2 관련 UI 구성
-    macro2_state_label = tk.Label(root, text="거던 준비 상태")
-    macro2_state_label.pack()
-
-    macro2_button = tk.Button(root, text="거던 버튼", command=button2_action)
-    macro2_button.pack()
 
     # 이미지 변경 관련 UI 구성
     image_change_label = tk.Label(root, text="찾을 이미지 변경")
@@ -142,13 +137,6 @@ def create_tray_icon():
 
     image_change_button = tk.Button(root, text="이미지 변경", command=image_change_action)
     image_change_button.pack()
-
-     # 경던,끈던 관련 UI 구성
-    daily_q_label = tk.Label(root, text="경던,끈던 실행")
-    daily_q_label.pack()
-
-    daily_q_button = tk.Button(root, text="경던,끈던 버튼", command=daily_q_action)
-    daily_q_button.pack()
 
     # 창 닫기 이벤트 핸들러 설정
     root.protocol("WM_DELETE_WINDOW", on_closing)
@@ -164,14 +152,6 @@ def button1_action():
     else:
         macro1_state_label.config(text="전투 매크로 중지 상태")
 
-#매크로 2번째 버튼 이벤트
-def button2_action():
-    global macro2_running, macro2_state_label
-    macro2_running = not macro2_running
-    if macro2_running:
-        macro2_state_label.config(text="거던매크로 실행 상태")
-    else:
-        macro2_state_label.config(text="거던매크로 중지 상태")
 
 #이미지 변경 버튼 이벤트
 def image_change_action():
@@ -208,18 +188,6 @@ def image_change_action():
 
     cv2.destroyAllWindows()
 
-# 경던,끈던 버튼 이벤트
-def daily_q_action():
-    print("경던,끈던 버튼이 클릭되었습니다.")
-    # 여기에 경던,끈던 수행 코드 추가
-    #1. 메인화면
-    #2. 운전
-    #3. 채굴
-    #4. 경험치던전 5 자동 1회
-    #5. 끈던
-    #6. 끈던 자동 3회
-    #7. 메인화면
-
 #승률 딸깍
 def BattleM():
     # 매크로 실행
@@ -236,27 +204,13 @@ def DefeatM():
     #     macro(image) #전투 다시하기
     time.sleep(2)
 
-#거던 매크로
-def MirrorD():
-    #편성표클릭 필요(클릭)
-    #에고 획득 클릭
-    #선택지 스킵버튼 클릭
-    #거던 선택지 케이스 함수 따로 추가 필요(이미지 인식)
-    #판정 인격 클릭
-    #판정 버튼 클릭
-    #떠나기 버튼 클릭
-    time.sleep(.5)
-
-#편성표 스킵, 대화 스킵 필요
 
 # 매크로 실행 상태
 macro1_running = False
 
-# 매크로2 실행 상태
-macro2_running = False
 
 def main():
-    global macro1_running, running, macro1_state_label, macro2_running
+    global macro1_running, running, macro1_state_label
     running = True
 
     tray_thread = threading.Thread(target=create_tray_icon)
@@ -277,10 +231,6 @@ def main():
         if macro1_running:
             run_macro_in_thread(BattleM())  # 스레드에서 매크로 실행
             run_macro_in_thread(DefeatM())  # 스레드에서 매크로 실행
-
-        #  거던매크로 관련 로직...
-        if macro2_running:
-            run_macro_in_thread(MirrorD())  # 스레드에서 매크로 실행
 
 if __name__ == "__main__":
     main()

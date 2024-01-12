@@ -22,6 +22,8 @@ ScreenMacro.py
 폴더에서 
 pyinstaller -w -F ScreenMacro.py
 
+pyinstaller -w -F --icon=icon\caron.ico lim1bus.py
+
 ## 필요한 외부 라이브러리
 pip install opencv-python numpy pyautogui keyboard pillow
 
