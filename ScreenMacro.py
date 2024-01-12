@@ -119,7 +119,7 @@ def create_tray_icon():
     global root, macro1_state_label, macro2_state_label, image_change_label, daily_q_label
     root = tk.Tk()
     root.title("매크로 프로그램")
-    root.iconbitmap('icon\M_icon.ico')
+    #root.iconbitmap('icon\M_icon.ico') #아이콘 설정
 
     menu = Menu(root, tearoff=0)
     menu.add_command(label="종료", command=on_closing)
